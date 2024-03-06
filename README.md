@@ -1,5 +1,5 @@
-# cme-nxc-cheat-sheet
-A cheat sheet for CrackMapExec and NetExec
+# CrackMapExec and NetExec Cheat Sheet
+A cheat sheet for CrackMapExec and NetExec, featuring useful commands and modules for different services to use during Pentesting
 
 **CrackMapExec:** https://github.com/byt3bl33d3r/CrackMapExec (no longer maintained)
 
