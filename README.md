@@ -126,7 +126,7 @@ crackmapexec ldap target -u username -p password --gmsa-convert-id id
 ```bash
 crackmapexec ldap domain -u username -p password --gmsa-decrypt-lsa gmsa_account
 ```
-### Group Policy Preferences
+## Group Policy Preferences
 ```bash
 crackmapexec smb target -u username -p password -M gpp_password
 ```
