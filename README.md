@@ -161,7 +161,7 @@ netexec smb target -u username -p password --ntds
 ```
 # Bloodhound
 ```bash
-netexec ldap target -u username -p password --bloodhound -ns ip --collection All
+nxc ldap target -u username -p password --bloodhound --dns-server ip --dns-tcp -c all
 ```
 # Useful Modules
 ## Webdav
