@@ -282,7 +282,6 @@ netexec smb target -u username -p password -M enum_av
 ## Resources
 - https://www.netexec.wiki/
 - https://www.rayanle.cat/lehack-2024-netexec-workshop-writeup/
-- https://www.canva.com/design/DAFxsCFYkiI/Jh4Mfms1FEq4NZn9zI1EsQ/edit
 ## Practice
 - Mist (HackTheBox)
 - Rebound (HackTheBox)
